@@ -1,0 +1,55 @@
+/*a.	Show First name and last name of employees whose job title is “Sales Representative”, ranking from oldest to youngest. 
+You may use HumanResources.Employee table and Person.Person table. (14 rows)*/
+
+SELECT pp.FirstName, pp.LastName, hr.JobTitle, hr.BirthDate
+FROM HumanResources.Employee as hr
+JOIN Person.Person as pp
+ON hr.BusinessEntityID = pp.BusinessEntityID
+WHERE JobTitle like '%Sales Rep%'
+ORDER BY BirthDate ASC;
+
+/*b.	Find out all the products which sold more than $5000 in total. Show product ID and name and total amount collected after selling the products.
+You may use LineTotal from Sales.SalesOrderDetail table and Production.Product table. (254 rows)*/
+
+SELECT pp.Name, ss.ProductID, SUM(ss.LineTotal) as TotalAmountCollected
+FROM
+Production.Product as pp
+JOIN Sales.SalesOrderDetail as ss
+ON ss.ProductID = pp.ProductID
+GROUP BY pp.Name, ss.ProductID
+HAVING SUM(ss.LineTotal) > 5000
+ORDER BY TotalAmountCollected ASC;
+
+/*c.	Show BusinessEntityID, territory name and SalesYTD of all sales persons whose SalesYTD is greater than $500,000, 
+regardless of whether they are assigned a territory. You may use Sales.SalesPerson table and Sales.SalesTerritory table. (16 rows)*/
+
+SELECT sp.BusinessEntityID, st.name as Territory_Name, sp.SalesYTD
+FROM Sales.SalesPerson as sp
+LEFT JOIN Sales.SalesTerritory as st
+ON sp.TerritoryID = st.TerritoryID
+WHERE sp.SalesYTD > 500000
+ORDER BY sp.SalesYTD ASC
+
+	/* I did another query below in case you were asking for the sales persons first and last names.*/
+
+SELECT sp.BusinessEntityID, pp.FirstName, pp.LastName, st.name as Territory_Name, sp.SalesYTD
+FROM Sales.SalesPerson as sp
+LEFT JOIN Sales.SalesTerritory as st
+ON sp.TerritoryID = st.TerritoryID
+JOIN Person.Person as pp
+ON sp.BusinessEntityID = pp.BusinessEntityID
+WHERE sp.SalesYTD > 500000
+ORDER BY sp.SalesYTD ASC;
+
+/*d.	Show the sales order ID of those orders in the year 2008 of which the total due is great than the average total due of all the orders of the same year. 
+(3200 rows)*/
+
+SELECT SalesOrderID, OrderDate, TotalDue
+FROM Sales.SalesOrderHeader
+WHERE ORDERDATE LIKE '%2008%' and TotalDue >
+(
+SELECT AVG(TotalDue)
+FROM Sales.SalesOrderHeader
+WHERE OrderDate like '%2008%'
+)
+ORDER BY TotalDue ASC;
