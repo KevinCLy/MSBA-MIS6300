@@ -1,0 +1,47 @@
+use AdventureWorksDW2012;
+
+/*1, Display number of orders and total sales amount(sum of SalesAmount) of Internet Sales in 1st quarter each year in each country. 
+Note: your result set should produce a total of 18 rows. */
+
+SELECT COUNT(fs.SalesOrderNumber) as Sales_Orders, SUM(fs.SalesAmount) as Sales_Amount, it.SalesTerritoryCountry, dd.CalendarQuarter, dd.CalendarYear
+FROM dbo.FactInternetSales as fs
+JOIN dbo.DimSalesTerritory as it
+ON fs.SalesTerritoryKey = it.SalesTerritoryKey
+JOIN dbo.DimDate as dd
+ON fs.OrderDateKey = dd.DateKey
+WHERE dd.CalendarQuarter = 1
+GROUP BY it.SalesTerritoryCountry, dd.CalendarQuarter, dd.CalendarYear;
+
+/*2, Show total reseller sales amount (sum of SalesAmount), calendar quarter of order date, product category name and reseller’s business type by quarter by category and by business type in 2006. Note: your result set should produce a total of 44 rows. */
+
+SELECT pc.EnglishProductCategoryName, dr.BusinessType, dd.CalendarQuarter, dd.CalendarYear, SUM(fr.SalesAmount) as Sales_Amount
+FROM dbo.DimDate as dd
+JOIN dbo.FactResellerSales as fr
+ON dd.DateKey = fr.OrderDateKey
+JOIN dbo.DimReseller as dr
+ON fr.ResellerKey = dr.ResellerKey
+JOIN dbo.DimProduct as dp
+ON fr.ProductKey = dp.ProductKey
+JOIN dbo.DimProductSubcategory as ps
+On dp.ProductSubcategoryKey = ps.ProductSubcategoryKey
+JOIN dbo.DimProductCategory as pc
+ON ps.ProductCategoryKey = pc.ProductCategoryKey
+WHERE CalendarYear=2006
+GROUP BY dd.CalendarQuarter, dd.CalendarYear, dr.BusinessType, pc.EnglishProductCategoryName;
+
+/*3, Based on 2, perform an OLAP operation: slice. In comment, describe how you perform the slicing, i.e. what do you do to what dimension(s)?
+Why is it a operation of slicing?*/
+
+/* "Slice" allows us to do exactly what it says, slice off a piece of the hypercube.  The slice operation selects one particular dimension from a given cube and
+provides a new sub-cube. Visually it looks like you are just slicing off a piece of the larger hypercube based on one dimension, like a slice of bread or cheese. 
+Another way for you to take a piece of the whole hypercube is to "Dice" it.  Instead of selecting one particular dimension, you are using 
+two or dimensions to create a sub-cube of the hypercube.  Visually, it looks like you take another a chunk of a cube from the bigger whole cube.*/
+
+
+/*4, Based on 2, perform an OLAP operation: drill-down. In comment, describe how you perform the drill-down, 
+i.e. what do you do to what dimension(s)? Why is it a operation of drilling-down?*/
+
+/* "Drill Down" allows us to move down the data hiearchy.  For example, if we drill down on the Dimension Date, DimDate.  The hiearchy would start off at the 
+CalendarYear (year), drill down to the MonthNumberofYear (months), WeekNumberofYear (weeks), etc.  Allowing for us to get a more specific focus on our data.
+If we were to work in the oppositie direction with our dimensions on the data hiearchy we would "Roll Up"*/
+
